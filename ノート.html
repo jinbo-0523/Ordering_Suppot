@@ -55,8 +55,21 @@ $ git remoteで
 originと出れば成功
 
 
+devise使うなら
+# deviseの設定ファイルを作成
+$ rails g devise:install
 
+ログイン機能を持つUserクラスを作成
+rails g devise user
+ファイルが作成されてルートに記述される
 
+config/routes.rb
+Rails.application.routes.draw do
+  devise_for :users
+  
+# 作成されたマイグレーションファイルを実行
+$ rails db:migrate
+  
 
 
 
