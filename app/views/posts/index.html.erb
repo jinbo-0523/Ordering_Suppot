@@ -1,0 +1,23 @@
+  <div class = header>店鋪情報
+    <div class = "shop_data">
+      <div class ="shop_name">＿＿店</div>
+      <div class ="shop_ID">TID:0000</div> 
+    </div> 
+    <div class = assistant_data>
+      <div class = "shop assistant_ID">＜ここに社員番号＞</div>
+      <div class = "shop assistant_name">＜ここに社員名＞</div>
+    </div>
+  </div>
+
+  
+  <main></main>
+    <%= link_to 'オーダー作成', '/posts/new' %>
+      <div class = menu>メニュー 一覧
+        <% @posts.each do |post| %>
+        <div class="menu_list"></div>
+          <%= post.menu %>出数：
+            <input type = "number" name = "count" class = count_box placeholder="半角数字">
+        <% end %>
+    
+  </div>
+  <input type="submit" value="計算開始(post#show)">

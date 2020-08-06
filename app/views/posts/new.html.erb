@@ -1,0 +1,6 @@
+<h1>オーダー作成</h1>
+    <div class = menu_add>メニュー 追加</div>
+    <%= form_tag('/posts', method: :post) do %> 
+       <input type="name" name="menu" class = menu_add_box placeholder="メニュー名">
+       <input type="submit" value="追加(レシピテーブル#new)" class = menu_add_btn>
+    <% end %>

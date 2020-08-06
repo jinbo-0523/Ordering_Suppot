@@ -7,12 +7,17 @@ rails _バージョン指定_ new アプリ名 -d mysql でディレクトリが
 ここまででブラウザに表示できるようになった。
 
 
+htmlのhead部分の簡易書き
 htmlで!を押すとheadが一気打ち htmlなら
-打ち 　翻訳言語 日本語（デフォでen：英語）
+打ち 翻訳言語 日本語（デフォでen：英語）
 
-先にgen deviseを入れる
+
+<!-- 先にgem deviseを入れる
 gem 'devise' → bundle install 
+(※これは完全に失敗でした。簡易機能で先に作成した方が改良で済む) -->
 
+
+gitでトラクション(更新追跡機能)を有効にする
 $ git init  #当該ディレクトリをGitの管理下に置く
 Initialized empty Git repository in /Users/username/projects/sample/.git/
 $ ls .git  #隠しディレクトリである.gitがあるかどうか確認
@@ -45,6 +50,7 @@ $ git add .
 $ git commit .
 でこれだとコミットメッセージねぇから入れろって言ってくる。
 入れてもコミットメッセージないから中止される
+
 $ git commit -m '(コミットメッセージ内容)'
 
 git hub右上 ＋ を押してnew リポジトリを選択
@@ -55,7 +61,7 @@ $ git remoteで
 originと出れば成功
 
 
-devise使うなら
+<!-- devise使うなら
 # deviseの設定ファイルを作成
 $ rails g devise:install
 
@@ -65,11 +71,179 @@ rails g devise user
 
 config/routes.rb
 Rails.application.routes.draw do
-  devise_for :users
-  
-# 作成されたマイグレーションファイルを実行
+  devise_for :users -->
+
+データベースの作成
+$ rails db:create  
+
+作成されたマイグレーションファイルを実行
 $ rails db:migrate
   
+ルーティングの設定
+初期はget 'posts', to: 'posts#index'でルート設定
+ローカルアクセス。
+ルートの設定してもコントローラーがないからエラー
+→ooo_controllerを作成
+
+コントローラーの作成
+$ rails g controller posts  # コントローラーを作成する
+※ファイル作成だとビューまで作られない
+viewにpostsができる
+posts_controllerにindexアクションを設定
+http://localhost:3000/posts にアクセスすると
+ActionController::UnknownFormat in PostsController#index
+ビューがないとエラーが出てくる
+
+index.htmlだと多分DOCTYPEとかが必要 → ホントか？？？
+index.html.erbなら最初から<h1>トップページ</h1>とかで書ける
+indexにインスタンス変数を定義(@postなど)すれば
+  app/views/posts/index.html.erb
+    <h1>トップページ</h1>
+    <%= @post %>
+htmlにそのまま打てばデータが引っ張れる
+
+
+.erbファイルの書き方
+<%= %>  表示される
+<%  %>  表示されない
+
+
+モデルの作成
+$ rails g model モデル名
+モデルの生成とマイグレーションファイルの作成ができる
+
+マイグレートファイルの編集
+migrateディレクトリ内のファイルの編集
+・カラムの追加、変更(？)
+以下例
+create_table :posts do |t|
+      t.string :menu_name
+      t.integer :count
+        ・
+        ・
+        ・
+型	     どのような型か	   用途
+integer	 数字	金額、      回数など
+string	 文字(短文)	      ユーザー名、メールアドレスなど
+text	   文字(長文)	      投稿文など
+boolean	 真か偽か	        はい・いいえの選択肢など
+datetime	日付と時刻	    作成日時、更新日時など
+
+
+マイグレーションを実行する
+$ rails db:migrate  
+
+シークエル・プロにテーブルが作成されたので
+試しに直打ちしてみる(データcreated,updatedも入力)
+rails cでコンソール開始、確認
+
+・Post.allで全取得できるか
+・Post.find(1)で１つだけ取得
+・post = Post(1)
+  post 
+  で変数代入、表示 
+・post.contentでカラムの指定
+
+controllerに移って
+@post = Post~で定義
+
+.find(1)の場合、viewで
+<%= @posts.content %>
+<%= @posts.created_at %
+とすると、エラーなし
+
+allの場合、viewで
+<%= @posts.content %>
+<%= @posts.created_at %
+とすると、エラー
+eachを使用することで各レコードからカラムを指定して取り出せる
+
+<% @posts.each do |post| %>
+（うっかり<%= %>にすると全表示になってしまうので注意）
+
+ビューを整える
+posts.scssにCSSの記述をしていく
+
+データを保存できるようにする(①newの設定、遷移)
+・route.rb
+    resources :posts, only: [:index, :new]
+・posts_controler.rb
+    def new
+    end
+・new.html.erb(erbでの書き方：form_tag ↓↓↓ )
+<%= form_tag('/posts', method: :post) do %> 
+<% end %>
+を使用
+/postsはルーティングのURIパターン、method: :postはHTTPメソッド
+input typeでググれば、クイックリファレンスに飛ぶ
+
+・リンクを貼り付けnewに飛ばす
+  <%= link_to 'リンクに表示する文字', 'リンク先のURL' %>
+  <%= link_to 'オーダー作成', '/posts/new' %>
+
+データの保存できるようにする(②createで保存させる)
+・route.rb
+    resources :posts, only: [:index, :new, :create]
+・posts_controler.rb
+    def create
+    end
+              Prefix Verb   URI Pattern       Controller#Action
+              POST          /posts(.:format)  posts#create
+                <%= form_tag('/posts', method: :post) do %> 
+              ※prifixのPOSTとmethodのpostがリンクしたことになる
+def create
+  Post.create(登録したいデータ)
+→ Post.create(テーブルのカラム名: params[:inputタグのname])
+→ Post.create(menu: params[:menu])
+railsだと投稿する時はストロングパラメーターとプライベートメソッドを使う
+
+posts_controller.rb（#createでプライベートメソッドを呼び出す）
+  create
+    Post.create(post_params)
+  end
+  ・
+  ・
+  ・
+  private
+    def post_params
+      params.permit(:menu)
+    end
+  end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
